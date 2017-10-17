@@ -88,8 +88,13 @@ enum write_status to_bmp(FILE* out, struct bmp_header* const bmp_h, struct image
 	return WRITE_OK;
 }
 
-struct image* rotate(struct image const* source) {
+struct image* rotate(struct image const * source) {
+	/*const uint64_t new_height = old_height;
+	const uint64_t new_width = old_width;
+	struct pixel new_image[new_height][new_width];*/
+	
 
+	
 }
 
 int main(int argc, char *argv[]) {
@@ -100,12 +105,10 @@ int main(int argc, char *argv[]) {
 	struct bmp_header* bh_ptr = (struct bmp_header*)malloc(sizeof(struct bmp_header));
 	struct image* img_ptr = (struct image*)malloc(sizeof(struct image));
 	enum read_status rs = from_bmp(inptr, bh_ptr, img_ptr);
+	
 
-	//fwrite(bh_ptr, sizeof(struct bmp_header), 1, outptr);
-	//fwrite(img_ptr->data, 1, bh_ptr->biSizeImage, outptr);	
-
-	//struct image* new_img_ptr = rotate(img_ptr);
-	enum write_status ws = to_bmp(outptr, bh_ptr,img_ptr/*new_img_ptr*/);
+	struct image* new_img_ptr = rotate(img_ptr);
+	enum write_status ws = to_bmp(outptr, bh_ptr,/*img_ptr*/new_img_ptr);
 	fclose(inptr);
 	fclose(outptr);
 }
