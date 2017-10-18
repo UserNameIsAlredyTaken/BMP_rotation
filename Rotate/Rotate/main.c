@@ -55,7 +55,12 @@ enum read_status from_bmp(FILE* in, struct bmp_header* const bmp_h, struct image
 	read->width = bmp_h->biWidth;
 	read->height = abs(bmp_h->biHeight);
 	read->data = (struct pixel*)malloc(bmp_h->biSizeImage);
-	fread(read->data, 1, bmp_h->biSizeImage, in);	
+	const int padding = (4 - (bmp_h->biWidth * sizeof(struct pixel)) % 4) % 4;
+	int i;
+	for (i = 0; i < read->height;i++){
+		fread(read->data+i*read->width,sizeof(struct pixel), read->width,in);
+		fseek(in,padding,SEEK_CUR);
+	}
 	return READ_OK;
 }
 
@@ -67,34 +72,58 @@ enum write_status to_bmp(FILE* out, struct bmp_header* const bmp_h, struct image
 	if (out == NULL) {
 		return WRITE_COULDNT_CRETE;
 	}
-	fwrite(bmp_h, sizeof(struct bmp_header), 1, out);	
-	fwrite(img->data, 1, bmp_h->biSizeImage, out);
-	/*img->data = (struct pixel*)malloc(bmp_h->biSizeImage);
-	struct pixel* offset = img->data;
-	for (int i = 0; i < abs(bmp_h->biHeight); i++) {
-		for(int j = 0; j < bmp_h->biWidth; j++){
-			fwrite(offset, sizeof(struct pixel), 1, out);
-			offset ++;
-		}
-		/*fwrite(offset, sizeof(struct pixel), img_width, out);
-		offset += sizeof(struct pixel)*img_width;*/
-		/*const int padding = (4 - (bmp_h->biWidth * sizeof(struct pixel)) %4)% 4;
-		//offset += padding * sizeof(struct pixel);
-		for (int k = 0; k < padding; k++) {
-			offset++;
-			fputc(0x00, out);
-		}
-	}*/
+	const int padding = (4 - (bmp_h->biWidth * sizeof(struct pixel)) % 4) % 4;
+	struct bmp_header new_header = { 0x4D42,sizeof(struct bmp_header)+(img->width+padding)*img->height,0,54,40,img->width,img->height,1,24,0,(img->width + padding)*img->height,0,0,0,0 };
+	fwrite(&new_header, sizeof(struct bmp_header), 1, out);
+	//fwrite(bmp_h, sizeof(struct bmp_header), 1, out);		
+	int i;
+	for(i=0;i<img->height;i++){
+		fwrite(img->data + i*img->width, sizeof(struct pixel), img->width, out);
+		fseek(out, padding, SEEK_CUR);
+	}
 	return WRITE_OK;
 }
 
-struct image* rotate(struct image const * source) {
-	/*const uint64_t new_height = old_height;
-	const uint64_t new_width = old_width;
-	struct pixel new_image[new_height][new_width];*/
-	
+struct image* rotate_image_left(struct image const * source) {
+	struct image* new_img = (struct image*)malloc(sizeof(struct image));
+	new_img->width = source->height;
+	new_img->height = source->width;
+	new_img->data = (struct pixel*)malloc(sizeof(struct pixel)*new_img->width*new_img->height);
+	int i, j;
+	for(i=0;i<new_img->height;i++){
+		for (j = 0; j<new_img->width; j++) {
+			*(new_img->data+i*new_img->width+j) = *(source->data+(new_img->width-j-1)*new_img->height+i);
+		}
+	}
 
-	
+	return new_img;
+}
+struct image* rotate_image_rigth(struct image const * source) {
+	struct image* new_img = (struct image*)malloc(sizeof(struct image));
+	new_img->width = source->height;
+	new_img->height = source->width;
+	new_img->data = (struct pixel*)malloc(sizeof(struct pixel)*new_img->width*new_img->height);
+	int i, j;
+	for (i = 0; i<new_img->height; i++) {
+		for (j = 0; j<new_img->width; j++) {
+			*(new_img->data + i*new_img->width + j) = *(source->data + j*new_img->height + i);
+		}
+	}
+
+	return new_img;
+}
+struct bmp_header* rotate_header(struct bmp_header const * old_header){
+	uint32_t new_width = old_header->biHeight;
+	uint32_t new_height = old_header->biWidth;
+	const int padding = (4 - (new_width * sizeof(struct pixel)) % 4) % 4;
+	uint32_t new_fileSize = sizeof(struct bmp_header) + (new_width + padding)*new_height;
+	uint32_t new_sizeImage = (new_width + padding)*new_height;
+	struct bmp_header* new_header = (struct bmp_header*)malloc(sizeof(struct bmp_header));
+	new_header->biHeight = new_height;
+	new_header->biWidth = new_width;
+	new_header->bfileSize = new_fileSize;
+	new_header->biSizeImage = new_sizeImage;
+	return new_header;
 }
 
 int main(int argc, char *argv[]) {
@@ -107,8 +136,10 @@ int main(int argc, char *argv[]) {
 	enum read_status rs = from_bmp(inptr, bh_ptr, img_ptr);
 	
 
-	struct image* new_img_ptr = rotate(img_ptr);
-	enum write_status ws = to_bmp(outptr, bh_ptr,/*img_ptr*/new_img_ptr);
+	//struct image* new_img_ptr = rotate_image_left(img_ptr);
+	struct image* new_img_ptr = rotate_image_rigth(img_ptr);
+	struct bmp_header* new_bh_ptr = rotate_header(bh_ptr);
+	enum write_status ws = to_bmp(outptr, /*bh_ptr*/new_bh_ptr,/*img_ptr*/new_img_ptr);
 	fclose(inptr);
 	fclose(outptr);
 }
