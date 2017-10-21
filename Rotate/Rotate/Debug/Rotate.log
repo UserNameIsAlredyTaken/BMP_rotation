@@ -1,3 +1,8 @@
-﻿  main.c
+﻿  functions.c
+c:\users\danil\desktop\ясп\lab5\bmp_rotation\rotate\rotate\functions.c(28): warning C4244: функция: преобразование "uint64_t" в "::size_t", возможна потеря данных
+c:\users\danil\desktop\ясп\lab5\bmp_rotation\rotate\rotate\functions.c(48): warning C4244: функция: преобразование "uint64_t" в "::size_t", возможна потеря данных
+c:\users\danil\desktop\ясп\lab5\bmp_rotation\rotate\rotate\functions.c(43): warning C4244: инициализация: преобразование "uint64_t" в "uint32_t", возможна потеря данных
+c:\users\danil\desktop\ясп\lab5\bmp_rotation\rotate\rotate\functions.c(64): warning C4244: функция: преобразование "uint64_t" в "::size_t", возможна потеря данных
+c:\users\danil\desktop\ясп\lab5\bmp_rotation\rotate\rotate\functions.c(78): warning C4244: функция: преобразование "uint64_t" в "::size_t", возможна потеря данных
   Rotate.vcxproj -> C:\Users\danil\Desktop\ЯСП\Lab5\BMP_rotation\Rotate\Debug\Rotate.exe
   Rotate.vcxproj -> C:\Users\danil\Desktop\ЯСП\Lab5\BMP_rotation\Rotate\Debug\Rotate.pdb (Partial PDB)

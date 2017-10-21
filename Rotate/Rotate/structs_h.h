@@ -1,5 +1,5 @@
 #pragma once
-#pragma pack(push,2)
+#pragma pack(push,1)
 struct bmp_header {
 	uint16_t bfType;
 	uint32_t bfileSize;
@@ -19,7 +19,7 @@ struct bmp_header {
 };
 #pragma pack(pop)
 
-#pragma pack(push,2)
+#pragma pack(push,1)
 struct pixel {
 	uint8_t b;
 	uint8_t g;

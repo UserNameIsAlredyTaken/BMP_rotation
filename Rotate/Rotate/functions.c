@@ -39,15 +39,21 @@ enum write_status to_bmp(FILE* out, struct bmp_header* const bmp_h, struct image
 	if (out == NULL) {
 		return WRITE_COULDNT_CRETE;
 	}
-	const int padding = (4 - (bmp_h->biWidth * sizeof(struct pixel)) % 4) % 4;
+	const int padding = (4 - (bmp_h->biWidth * sizeof(struct pixel)) % 4) %4;
 	struct bmp_header new_header = { 0x4D42,sizeof(struct bmp_header) + (img->width + padding)*img->height,0,54,40,img->width,img->height,1,24,0,(img->width + padding)*img->height,0,0,0,0 };
 	fwrite(&new_header, sizeof(struct bmp_header), 1, out);
 	//fwrite(bmp_h, sizeof(struct bmp_header), 1, out);		
 	int i;
 	for (i = 0; i<img->height; i++) {
 		fwrite(img->data + i*img->width, sizeof(struct pixel), img->width, out);
-		fseek(out, padding, SEEK_CUR);
+		fwrite(img->data + (i)*img->width, sizeof(uint8_t), padding, out);
+		//fseek(out, padding, SEEK_CUR);
 	}
+	/*if(padding!=0){
+		//fflush(out);
+		fseek(out, -1*padding, SEEK_CUR);
+		fputc(0x00, out);
+	}*/
 	return WRITE_OK;
 }
 
